@@ -1,17 +1,20 @@
 package com.example.spring_boot_ddazaa;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -24,11 +27,81 @@ public class SpringBootDdazaaApplication {
         SpringApplication.run(SpringBootDdazaaApplication.class, args);
     }
 
+    @Bean
+    CommandLineRunner commandLineRunner(ObjectMapper objectMapper) throws JsonProcessingException {
+        String personString = "{\"id\":1,\"name\":\"John Doe\",\"age\":23}";
+        Person person = objectMapper.readValue(personString, Person.class);
+        System.out.println(person);
+        System.out.println(objectMapper.writeValueAsString(person));
+        return args -> {
+
+        };
+    }
+
     public enum Gender {MALE, FEMALE}
 
     public enum SortingOrder {ASC, DESC}
 
-    public record Person(int id, String name, int age, Gender gender) {
+//    public record Person(
+//            int id,
+////            @JsonGetter("foo") String name, // for change the name of the response Json
+//            @JsonGetter("foo") String name,
+////            @JsonIgnore int age, // to ignore the field in the response Json
+//            @JsonIgnore int age,
+//            Gender gender) {
+//    }
+
+    public static class Person {
+        private final int id;
+        private final String name;
+        private final int age;
+        private final Gender gender;
+
+        public Person(int id, String name, int age, Gender gender) {
+            this.id = id;
+            this.name = name;
+            this.age = age;
+            this.gender = gender;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Gender getGender() {
+            return gender;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        @Override
+        public String toString() {
+            return "Person1{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    ", age=" + age +
+                    ", gender=" + gender +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Person person = (Person) o;
+            return id == person.id && age == person.age && Objects.equals(name, person.name) && gender == person.gender;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(id, name, age, gender);
+        }
     }
 
     public record PersonUpdateRequest(
@@ -67,11 +140,11 @@ public class SpringBootDdazaaApplication {
             System.out.println(contentType);
 
             return people.stream()
-                    .sorted(Comparator.comparing(Person::id))
+                    .sorted(Comparator.comparing(Person::getId))
                     .collect((Collectors.toList()));
         }
         return people.stream()
-                .sorted(Comparator.comparing(Person::id).reversed())
+                .sorted(Comparator.comparing(Person::getId).reversed())
                 .collect((Collectors.toList()));
     }
 
