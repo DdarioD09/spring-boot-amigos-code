@@ -48,7 +48,7 @@ public class SpringBootDdazaaApplication {
     }
 
     @GetMapping
-    public List<Person> getPersons(
+    public List<Person> getPeople(
             HttpMethod httpMethod, // These are method arguments that can be passed to the methods that you annotated methods
             ServletRequest request,
             ServletResponse response,
