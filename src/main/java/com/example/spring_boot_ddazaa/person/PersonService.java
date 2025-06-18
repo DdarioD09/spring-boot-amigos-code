@@ -36,7 +36,7 @@ public class PersonService {
         personRepository.getPeople().removeIf(person -> person.id() == id);
     }
 
-    public void addPerson(Person person) {
+    public void addPerson(NewPersonRequest person) {
         personRepository.getPeople().add(new Person(
                 personRepository.getIdCounter().incrementAndGet(),
                 person.name(),
