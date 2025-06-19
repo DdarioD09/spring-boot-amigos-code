@@ -4,5 +4,6 @@ public record Person(
         int id,
         String name,
         int age,
-        Gender gender) {
+        Gender gender,
+        String email) {
 }

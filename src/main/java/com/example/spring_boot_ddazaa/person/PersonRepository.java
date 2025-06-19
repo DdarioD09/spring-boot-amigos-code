@@ -14,9 +14,9 @@ public class PersonRepository {
     private final List<Person> people = new ArrayList<>();
 
     {
-        people.add(new Person(idCounter.incrementAndGet(), "John", 20, Gender.MALE));
-        people.add(new Person(idCounter.incrementAndGet(), "Jane", 18, Gender.FEMALE));
-        people.add(new Person(idCounter.incrementAndGet(), "Bob", 30, Gender.MALE));
+        people.add(new Person(idCounter.incrementAndGet(), "John", 20, Gender.MALE, "john@example.com"));
+        people.add(new Person(idCounter.incrementAndGet(), "Jane", 18, Gender.FEMALE, "jane@example.com"));
+        people.add(new Person(idCounter.incrementAndGet(), "Bob", 30, Gender.MALE, "bob@example.com"));
     }
 
     public AtomicInteger getIdCounter() {
