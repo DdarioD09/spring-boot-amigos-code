@@ -27,17 +27,13 @@ public class PersonController {
 
     @GetMapping
     public List<Person> getPeople(
-            @RequestParam(
-                    value = "sort",
-                    required = false,
-                    defaultValue = "ASC"
-            ) SortingOrder sort
+            @RequestParam(value = "sort", required = false, defaultValue = "ASC") SortingOrder sort
     ) {
         return personService.getPeople(sort);
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Optional<Person>> getPersonById(@Valid @Positive @PathVariable("id") Integer id) {
+    public ResponseEntity<Person> getPersonById(@Valid @Positive @PathVariable("id") Integer id) {
         return ResponseEntity.ok(personService.getPersonById(id));
     }
 
@@ -59,10 +55,7 @@ public class PersonController {
     }
 
     @PutMapping("{id}")
-    public void updatePerson(
-            @RequestBody PersonUpdateRequest request,
-            @PathVariable("id") Integer id
-    ) {
+    public void updatePerson(@RequestBody PersonUpdateRequest request, @PathVariable("id") Integer id) {
         personService.updatePerson(request, id);
     }
 }
