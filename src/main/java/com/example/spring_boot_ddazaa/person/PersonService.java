@@ -3,6 +3,7 @@ package com.example.spring_boot_ddazaa.person;
 import com.example.spring_boot_ddazaa.SortingOrder;
 import com.example.spring_boot_ddazaa.exception.DuplicateResourceException;
 import com.example.spring_boot_ddazaa.exception.ResourceNotFoundException;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -19,75 +20,60 @@ public class PersonService {
     }
 
     public List<Person> getPeople(SortingOrder sort) {
-        if (sort == SortingOrder.ASC) {
-            return personRepository.getPeople().stream()
-                    .sorted(Comparator.comparing(Person::id))
-                    .collect((Collectors.toList()));
-        }
-        return personRepository.getPeople().stream()
-                .sorted(Comparator.comparing(Person::id).reversed())
-                .collect((Collectors.toList()));
+        return personRepository.findAll(
+                Sort.by(
+                        Sort.Direction.valueOf(sort.name()),
+                        "id"
+                )
+        );
     }
 
     public Person getPersonById(Integer id) {
-        return personRepository.getPeople().stream().filter(p -> p.id() == id).findFirst()
+        return personRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Person with id: " + id + " does not exists"));
     }
 
     public void deletePersonById(Integer id) {
-        boolean removed = personRepository.getPeople().removeIf(person -> person.id() == id);
-        if (!removed) {
+        if (!personRepository.existsById(id)) {
             throw new ResourceNotFoundException("Person with id: " + id + " does not exists");
         }
+        personRepository.deleteById(id);
     }
 
-    public void addPerson(NewPersonRequest person) {
-        if (person.email() != null && !person.email().isEmpty()) {
-            boolean exists = personRepository.getPeople().stream()
-                    .anyMatch(p -> p.email().equals(person.email()));
-            if (exists) {
+    public void addPerson(NewPersonRequest personRequest) {
+        if (personRequest.email() != null && !personRequest.email().isEmpty()) {
+            boolean isEmailTaken = personRepository.existsByEmail(personRequest.email());
+            if (isEmailTaken) {
                 throw new DuplicateResourceException("Email already exists");
             }
         }
-
-        System.out.println("Hello from here should add the person");
-        personRepository.getPeople().add(new Person(
-                personRepository.getIdCounter().incrementAndGet(),
-                person.name(),
-                person.age(),
-                person.gender(),
-                person.email()
-        ));
+        Person person = new Person(
+                personRequest.name(),
+                personRequest.age(),
+                personRequest.gender(),
+                personRequest.email()
+        );
+        personRepository.save(person);
     }
 
     public void updatePerson(PersonUpdateRequest request, Integer id) {
-        Person p = personRepository.getPeople().stream()
-                .filter(person -> person.id() == id)
-                .findFirst()
+        Person person = personRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Person with id: " + id + " does not exists"));
 
-        var index = personRepository.getPeople().indexOf(p);
-        Person person = personToUpdate(request, p);
-        personRepository.getPeople().set(index, person);
-    }
-
-    private Person personToUpdate(PersonUpdateRequest request, Person p) {
-        String name = p.name();
-        int age = p.age();
-
-        if (request.name() != null && !request.name().isEmpty() && !request.name().equals(p.name())) {
-            name = request.name();
+        if (request.name() != null && !request.name().isEmpty() && !request.name().equals(person.getName())) {
+            person.setName(request.name());
         }
-        if (request.age() != null && request.age() != 0 && !request.age().equals(p.age())) {
-            age = request.age();
+        if (request.age() != null && request.age() != 0 && !request.age().equals(person.getAge())) {
+            person.setAge(request.age());
         }
-        return new Person(
-                p.id(),
-                name,
-                age,
-                p.gender(),
-                p.email()
-        );
+        if (request.email() != null && !request.email().isEmpty() && !request.email().equals(person.getEmail())) {
+            boolean isEmailTaken = personRepository.existsByEmail(request.email());
+            if (isEmailTaken) {
+                throw new DuplicateResourceException("Email already exists");
+            }
+            person.setEmail(request.email());
+        }
+        personRepository.save(person);
     }
 }
