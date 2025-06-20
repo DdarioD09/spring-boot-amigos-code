@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,11 +39,13 @@ public class PersonController {
     }
 
     @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePersonById(@Valid @Positive @PathVariable("id") Integer id) {
         personService.deletePersonById(id);
     }
 
     @PostMapping()
+    @ResponseStatus(HttpStatus.CREATED)
     public void addPerson(@Valid @RequestBody NewPersonRequest person) {
 //    public void addPerson(@RequestBody NewPersonRequest person) {
 //        Control validation through  variable declaration
